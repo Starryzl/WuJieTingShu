@@ -23,4 +23,10 @@ public interface AlbumInfoService extends IService<AlbumInfo> {
      * @return
      */
     Page<AlbumListVo> findUserAlbumPage(Page<AlbumListVo> albumListVoPage, AlbumInfoQuery albumInfoQuery);
+
+    /**
+     * 根据ID删除专辑
+     * @param id
+     */
+    void removeAlbumInfo(Long id);
 }

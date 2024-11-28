@@ -14,6 +14,7 @@ import com.atguigu.tingshu.model.album.AlbumStat;
 import com.atguigu.tingshu.query.album.AlbumInfoQuery;
 import com.atguigu.tingshu.vo.album.AlbumInfoVo;
 import com.atguigu.tingshu.vo.album.AlbumListVo;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -101,6 +102,40 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
 
 
 		return albumInfoMapper.selectUserAlbumPage(albumListVoPage,albumInfoQuery);
+	}
+
+	/**
+	 * 根据ID删除专辑
+	 * @param id
+	 * 涉及到的表：
+	 * album_info
+	 * album_attribute_value album_id
+	 * album_stat album_id
+	 */
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void removeAlbumInfo(Long id) {
+
+		//判断当前专辑下是否有声音
+		AlbumInfo albumInfo = albumInfoMapper.selectById(id);
+		//判断
+		if(albumInfo.getIncludeTrackCount()>0){
+			throw new GuiguException(400,"当前专辑下有音频，请先删除音频");
+
+		}
+		//删除专辑
+		albumInfoMapper.deleteById(id);
+
+		//删除专辑统计
+		//select * from album_stat where id =?
+		QueryWrapper<AlbumStat> albumStatQueryWrapper = new QueryWrapper<>();
+		albumStatQueryWrapper.eq("album_id",id);
+		albumStatMapper.delete(albumStatQueryWrapper);
+
+		//删除专辑属性
+		QueryWrapper<AlbumAttributeValue> albumAttributeValueQueryWrapper = new QueryWrapper<>();
+		albumAttributeValueQueryWrapper.eq("album_id",id);
+		albumAttributeValueMapper.delete(albumAttributeValueQueryWrapper);
 	}
 
 	/**

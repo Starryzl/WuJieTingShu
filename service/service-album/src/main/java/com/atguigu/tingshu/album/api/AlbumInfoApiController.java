@@ -21,7 +21,17 @@ public class AlbumInfoApiController {
 	@Autowired
 	private AlbumInfoService albumInfoService;
 
-
+	/**
+	 * 根据ID删除专辑
+	 * /api/album/albumInfo/removeAlbumInfo/{id}
+	 * @param id
+	 * @return
+	 */
+	@DeleteMapping("/albumInfo/removeAlbumInfo/{id}")
+	public Result removeAlbumInfo(@PathVariable Long id){
+		albumInfoService.removeAlbumInfo(id);
+		return Result.ok();
+	}
 
 	/**
 	 * /api/album/albumInfo/findUserAlbumPage/{page}/{limit}
