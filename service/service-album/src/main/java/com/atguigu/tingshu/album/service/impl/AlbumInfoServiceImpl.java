@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -176,6 +177,7 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
 		AlbumInfo albumInfo = BeanUtil.copyProperties(albumInfoVo, AlbumInfo.class);
 		//设置ID
 		albumInfo.setId(id);
+		albumInfo.setUpdateTime(new Date());
 		//album_info
 		albumInfoMapper.updateById(albumInfo);
 
@@ -200,6 +202,32 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
 			albumAttributeValueMapper.insert(albumAttributeValue);
 		}
 
+	}
+
+	/**
+	 * 获取当前用户全部专辑列表
+	 * @return
+	 * track_info
+	 */
+	@Override
+	public List<AlbumInfo> findUserAllAlbumList(Long userId) {
+
+		//select id,album_title from album_info where user_id=1 order by id desc limit 10
+
+		//构建条件对象
+		QueryWrapper<AlbumInfo> queryWrapper = new QueryWrapper<>();
+		//添加条件
+		queryWrapper.eq("user_id",userId);
+		//排序
+		queryWrapper.orderByDesc("id");
+		//过滤返回字段
+		queryWrapper.select("id","album_title");
+		//选择返回条数
+		queryWrapper.last(" limit 10 ");
+
+		List<AlbumInfo> albumInfoList = albumInfoMapper.selectList(queryWrapper);
+
+		return albumInfoList;
 	}
 
 	/**

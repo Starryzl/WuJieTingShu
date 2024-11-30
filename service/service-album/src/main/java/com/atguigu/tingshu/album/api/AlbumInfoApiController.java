@@ -13,6 +13,8 @@ import org.apache.ibatis.annotations.Update;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Tag(name = "专辑管理")
 @RestController
 @RequestMapping("api/album")
@@ -21,6 +23,23 @@ public class AlbumInfoApiController {
 
 	@Autowired
 	private AlbumInfoService albumInfoService;
+
+
+
+	/**
+	 * 获取当前用户全部专辑列表
+	 * /api/album/albumInfo/findUserAllAlbumList
+	 * @return
+	 */
+	@GetMapping("/albumInfo/findUserAllAlbumList")
+	public Result<List<AlbumInfo>> findUserAllAlbumList(){
+
+		//获取用户ID
+		Long userId = AuthContextHolder.getUserId();
+		//调用查询
+		List<AlbumInfo> albumInfoList = albumInfoService.findUserAllAlbumList(userId);
+		return Result.ok(albumInfoList);
+	}
 
 
 	/**
