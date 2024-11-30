@@ -14,6 +14,7 @@ import com.atguigu.tingshu.model.album.AlbumStat;
 import com.atguigu.tingshu.query.album.AlbumInfoQuery;
 import com.atguigu.tingshu.vo.album.AlbumInfoVo;
 import com.atguigu.tingshu.vo.album.AlbumListVo;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -136,6 +137,69 @@ public class AlbumInfoServiceImpl extends ServiceImpl<AlbumInfoMapper, AlbumInfo
 		QueryWrapper<AlbumAttributeValue> albumAttributeValueQueryWrapper = new QueryWrapper<>();
 		albumAttributeValueQueryWrapper.eq("album_id",id);
 		albumAttributeValueMapper.delete(albumAttributeValueQueryWrapper);
+	}
+
+	/**
+	 * 根据ID查询专辑信息
+	 * @param id
+	 * @return
+	 */
+	@Override
+	public AlbumInfo getAlbumInfo(Long id) {
+		//查询专辑信息
+		AlbumInfo albumInfo = albumInfoMapper.selectById(id);
+		//查询专辑属性信息
+		//select * from album_attribute_value where album_id=id
+		LambdaQueryWrapper<AlbumAttributeValue> queryWrapper = new LambdaQueryWrapper<>();
+		queryWrapper.eq(AlbumAttributeValue::getAlbumId,id);
+		List<AlbumAttributeValue> albumAttributeValueList = albumAttributeValueMapper.selectList(queryWrapper);
+
+		//封装数据
+		if(albumInfo!=null){
+			albumInfo.setAlbumAttributeValueVoList(albumAttributeValueList);
+		}
+		return albumInfo;
+	}
+
+	/**
+	 * 修改专辑
+	 * @param albumInfoVo
+	 * @param id
+	 * album_info album_attribute_value
+	 *
+	 */
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void updateAlbumInfo(AlbumInfoVo albumInfoVo, Long id) {
+
+		//创建修改对象
+		AlbumInfo albumInfo = BeanUtil.copyProperties(albumInfoVo, AlbumInfo.class);
+		//设置ID
+		albumInfo.setId(id);
+		//album_info
+		albumInfoMapper.updateById(albumInfo);
+
+		//先删除属性数据
+		//delete from album_attribute_value where album_id=?
+		//构建条件对象
+		QueryWrapper<AlbumAttributeValue> queryWrapper = new QueryWrapper<>();
+		queryWrapper.eq("album_id",id);
+		//删除
+		albumAttributeValueMapper.delete(queryWrapper);
+		//添加属性数据
+
+		//保存album_attribute_value
+		List<AlbumAttributeValue> albumAttributeValueVoList = albumInfo.getAlbumAttributeValueVoList();
+
+		//判断
+		if(CollectionUtil.isEmpty(albumAttributeValueVoList)){
+			throw new GuiguException(400,"专辑信息不完整，没有属性信息。");
+		}
+		for (AlbumAttributeValue albumAttributeValue : albumAttributeValueVoList) {
+			albumAttributeValue.setAlbumId(albumInfo.getId());
+			albumAttributeValueMapper.insert(albumAttributeValue);
+		}
+
 	}
 
 	/**

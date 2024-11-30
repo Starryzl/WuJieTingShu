@@ -9,6 +9,7 @@ import com.atguigu.tingshu.vo.album.AlbumInfoVo;
 import com.atguigu.tingshu.vo.album.AlbumListVo;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +22,36 @@ public class AlbumInfoApiController {
 	@Autowired
 	private AlbumInfoService albumInfoService;
 
+
+	/**
+	 * 修改专辑
+	 * /api/album/albumInfo/updateAlbumInfo/{id}
+	 * @param albumInfoVo
+	 * @param id
+	 * @return
+	 */
+	@PutMapping("/albumInfo/updateAlbumInfo/{id}")
+	public Result updateAlbumInfo(@RequestBody AlbumInfoVo albumInfoVo,
+								  @PathVariable Long id){
+
+		albumInfoService.updateAlbumInfo(albumInfoVo,id);
+		return Result.ok();
+	}
+
+	//
+	/**
+	 * 根据ID查询专辑信息
+	 * /api/album/albumInfo/getAlbumInfo/{id}
+	 * @param id
+	 * @return
+	 */
+	@GetMapping("/albumInfo/getAlbumInfo/{id}")
+	public Result<AlbumInfo> getAlbumInfo(@PathVariable Long id){
+		AlbumInfo albumInfo = albumInfoService.getAlbumInfo(id);
+
+		return Result.ok(albumInfo);
+
+	}
 	/**
 	 * 根据ID删除专辑
 	 * /api/album/albumInfo/removeAlbumInfo/{id}
